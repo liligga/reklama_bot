@@ -1,14 +1,23 @@
-from sqlalchemy import String, ForeignKey, DateTime
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime
-from bot import db_engine
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from bot import db_engine, session
 
 
 class Base(DeclarativeBase):
-    pass
+    query = session.query_property()
 
 
-class Group(Base):
+class TimeStampedModel(Base):
+    __abstract__ = True
+
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now())
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now(), onupdate=datetime.now())
+
+
+class Group(TimeStampedModel):
     """
     Чтобы можно было отдельно видеть группы
     """
@@ -26,7 +35,7 @@ class Group(Base):
         return f"Group(id={self.id}, telegram_id={self.telegram_id})"
 
 
-class Posting(Base):
+class Posting(TimeStampedModel):
     """
     Чтобы можно было отдельно видеть посты,
     последнее время поста в группу и тд
